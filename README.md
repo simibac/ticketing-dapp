@@ -12,8 +12,8 @@ truffle unbox react
 
 ## Contribution Workflow
 
-0. (Optional) Create a new issue and add it to the _To Do_ column of _Lottery dApp_ project
-1. Assign yourself an issue from the _To Do_ column of the _Lottery dApp_ project and move it to the _In Progress_ column
+0. (Optional) Create a new issue and add it to the _To Do_ column of Ticketing dApp_ project
+1. Assign yourself an issue from the _To Do_ column of the Ticketing dApp_ project and move it to the _In Progress_ column
 2. Pull the latest changes from `origin/master`
 3. Create a new local branch beginning with the issue number (e.g., `4-feature`).
 4. Commit to this branch mentioning the issue number in the commit message (e.g. `add functionality xyz (#4)`
@@ -21,7 +21,7 @@ truffle unbox react
 6. Pull and merge the latest changes from `origin/master` into your local branch
 7. Verify that your changes still work as expected
 8. Merge your branch into `master` and push the changes
-9. Close the issue and move it to the _Done_ column of the _Lottery dApp_ project
+9. Close the issue and move it to the _Done_ column of the Ticketing dApp_ project
 
 ## Prerequisites
 
