@@ -1,4 +1,6 @@
-contract EventFacotry{
+pragma solidity ^0.5.0;
+
+contract EventFactory{
     
     mapping (uint => Event) public events;
     uint public eventIndex;
@@ -30,9 +32,9 @@ contract EventFacotry{
         events[eventIndex] = Event({
             owner: msg.sender, 
             eventId: eventIndex, 
-            name: "OASG", 
-            date: 123456, 
-            numTickets: 2, 
+            name: _name, 
+            date: _date, 
+            numTickets: _numTickets, 
             ticketPrice: 1, 
             ticketIndex: 0, 
             sellingQueueHead: 0,
@@ -64,17 +66,17 @@ contract EventFacotry{
         }
     }
     
-    function issueTicket(Event storage e, address owner) internal {
+    function issueTicket(Event storage e, address payable owner) internal {
             // issue the ticket
             Ticket storage t = e.tickets[e.ticketIndex];
             t.eventId = e.eventId;
-            t.owner = msg.sender;
+            t.owner = owner;
             t.ticketId = e.ticketIndex;
             e.tickets[e.ticketIndex] = t;
             e.ticketIndex++;
             
             // send ticket price to the event owner
-            (e.owner).send(msg.value);
+            (e.owner).transfer(msg.value);
     }
     
     function buyFromSellingQueue(Event storage e, address payable newOwner) internal{
