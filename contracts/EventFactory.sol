@@ -28,14 +28,14 @@ contract EventFactory{
         mapping (uint => address payable) buyingQueue;
     }
     
-    function createEvent(string memory _name, uint _date, uint _numTickets) public{
+    function createEvent(string memory _name, uint _date, uint _numTickets, uint _ticketPrice) public{
         events[eventIndex] = Event({
             owner: msg.sender, 
             eventId: eventIndex, 
             name: _name, 
             date: _date, 
             numTickets: _numTickets, 
-            ticketPrice: 1, 
+            ticketPrice: _ticketPrice, 
             ticketIndex: 0, 
             sellingQueueHead: 0,
             sellingQueueTail:0,

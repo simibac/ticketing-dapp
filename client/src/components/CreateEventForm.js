@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button, Form, Input, Dropdown, Message } from 'semantic-ui-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Web3Context } from '../utils/context';
 
-export default function CreateEventForm({ web3 }) {
+export default function CreateEventForm({ handleClose }) {
+	const { contract, accounts } = useContext(Web3Context);
+
 	const [ name, setName ] = useState('');
 	const [ website, setWebsite ] = useState('');
 	const [ startDate, setStartDate ] = useState(new Date());
-	const [ ticketPrice, setTicketPrice ] = useState(null);
+	const [ ticketPrice, setTicketPrice ] = useState('');
 	const [ showTicketPriceError, setShowTicketPriceError ] = useState(false);
-	const [ numberTickets, setNumberTickets ] = useState(null);
+	const [ numberTickets, setNumberTickets ] = useState('');
 	const [ showNumberTicketsError, setShowNumberTicketsError ] = useState(false);
+	const [ showWeb3Error, setShowWeb3Error ] = useState(false);
+	const [ formCompleted, setFormCompleted ] = useState(false);
 
 	const priceOptions = [
 		{ key: 'ETH', text: 'ETH', value: 'ETH' },
@@ -37,9 +42,30 @@ export default function CreateEventForm({ web3 }) {
 		}
 	};
 
-	const handleSubmit = () => {
-		// TODO check if all inputs are not empty
+	const handleSubmit = async () => {
+		// TODO check inputs for validity
+		setFormCompleted(true);
+		await contract.methods
+			.createEvent(name, startDate, numberTickets, ticketPrice)
+			.send({ from: accounts[0] })
+			.catch((err) => {
+				setShowWeb3Error(true);
+				console.log(err);
+			});
+
+		// this is necessary to make sure useEffect fires. if the state is the same it will not update and thus, not call useEffect
+		setShowWeb3Error(true);
+		setShowWeb3Error(false);
 	};
+
+	useEffect(
+		() => {
+			if (!showWeb3Error && formCompleted) {
+				handleClose();
+			}
+		},
+		[ showWeb3Error ]
+	);
 
 	return (
 		<Form error>
@@ -60,8 +86,8 @@ export default function CreateEventForm({ web3 }) {
 				<label>Start Date</label>
 				<DatePicker
 					inline
-					selected={startDate}
-					onChange={(date) => setStartDate(date)}
+					selected={new Date(startDate * 1000)}
+					onChange={(date) => setStartDate(date.getTime() / 1000)}
 					showTimeSelect
 					timeFormat="HH:mm"
 					timeIntervals={15}
@@ -91,6 +117,7 @@ export default function CreateEventForm({ web3 }) {
 				/>
 				{showTicketPriceError && <NumbericError />}
 			</Form.Field>
+			{showWeb3Error && <Web3Error />}
 			<Button type="Publish" onClick={handleSubmit}>
 				Submit
 			</Button>
@@ -104,4 +131,8 @@ const NumbericError = () => {
 
 const EmptyError = () => {
 	return <Message error header="Input Required" content="The input cannot be empty." />;
+};
+
+const Web3Error = () => {
+	return <Message error header="Web3 Error" content="There was an error with metamask" />;
 };
