@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Header, Modal, Icon, Card } from 'semantic-ui-react';
-import CreateEventForm from '../components/CreateEventForm';
-import Event from '../components/Event';
-
 import { Web3Context } from '../utils/context';
 
+import EventTable from '../components/Event/EventTable';
+import CreateEventModal from '../components/CreateEvent/CreateEventModal';
+import AddEventButton from '../components/CreateEvent/AddEventButton';
+
 export default function EventOrganizer() {
-	const { web3, accounts, contract } = useContext(Web3Context);
+	const { accounts, contract } = useContext(Web3Context);
+	const [ myEvents, setMyEvents ] = useState([]);
 
 	const [ modalOpen, setModalOpen ] = useState(false);
-	const [ events, setEvents ] = useState([]);
-
 	const handleOpen = () => setModalOpen(true);
-
 	const handleClose = () => setModalOpen(false);
 
 	const fetchNumberEvents = async () => {
@@ -23,44 +21,38 @@ export default function EventOrganizer() {
 		return await contract.methods.events(id).call();
 	};
 
-	const fetchAllEvents = async () => {
+	const fetchMyEvents = async (address) => {
 		const num = await fetchNumberEvents();
-		const events = [];
+		const myEvents = [];
 		for (let i = 0; i < num; i++) {
 			const event = await fetchEvent(i);
-			events.push(event);
+			if (event.owner === address) {
+				myEvents.push(event);
+			}
 		}
-		setEvents(events);
+		setMyEvents(myEvents);
+	};
+
+	const createEvent = async (name, startDate, numberTickets, ticketPrice) => {
+		await contract.methods
+			.createEvent(name, startDate, numberTickets, ticketPrice)
+			.send({ from: accounts[0] })
+			.catch((err) => {
+				console.log(err);
+				return err;
+			});
 	};
 
 	useEffect(() => {
-		fetchAllEvents(3);
+		fetchMyEvents(accounts[0]);
 	}, []);
 
 	return (
-		<div>
+		<div className="page-container">
 			<h1>Event Organizer Page</h1>
-			<Card.Group>{events.map((event) => <Event event={event} key={event.eventId} />)}</Card.Group>
-			<Modal
-				trigger={<AddEventButton handleOpen={handleOpen} />}
-				open={modalOpen}
-				onClose={handleClose}
-				size="small"
-			>
-				<Header icon="browser" content="Create New Event" />
-				<Modal.Content>
-					<CreateEventForm handleClose={handleClose} />
-				</Modal.Content>
-			</Modal>
+			<EventTable events={myEvents} />
+			<CreateEventModal handleClose={handleClose} createEvent={createEvent} modalOpen={modalOpen} />
+			<AddEventButton handleOpen={handleOpen} />
 		</div>
 	);
-}
-
-function AddEventButton({ handleOpen }) {
-	const addButtonStyle = {
-		position: 'fixed',
-		bottom: '20px',
-		right: '20px'
-	};
-	return <Button circular color="blue" size="massive" style={addButtonStyle} icon="plus" onClick={handleOpen} />;
 }

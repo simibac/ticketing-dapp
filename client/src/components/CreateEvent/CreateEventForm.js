@@ -1,18 +1,16 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Dropdown, Message } from 'semantic-ui-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Web3Context } from '../utils/context';
 
-export default function CreateEventForm({ handleClose }) {
-	const { contract, accounts } = useContext(Web3Context);
-
+export default function CreateEventForm({ handleClose, createEvent }) {
 	const [ name, setName ] = useState('');
 	const [ website, setWebsite ] = useState('');
-	const [ startDate, setStartDate ] = useState(new Date());
+	const [ startDate, setStartDate ] = useState(Math.floor(new Date().getTime() / 1000));
 	const [ ticketPrice, setTicketPrice ] = useState('');
-	const [ showTicketPriceError, setShowTicketPriceError ] = useState(false);
 	const [ numberTickets, setNumberTickets ] = useState('');
+
+	const [ showTicketPriceError, setShowTicketPriceError ] = useState(false);
 	const [ showNumberTicketsError, setShowNumberTicketsError ] = useState(false);
 	const [ showWeb3Error, setShowWeb3Error ] = useState(false);
 	const [ formCompleted, setFormCompleted ] = useState(false);
@@ -45,13 +43,12 @@ export default function CreateEventForm({ handleClose }) {
 	const handleSubmit = async () => {
 		// TODO check inputs for validity
 		setFormCompleted(true);
-		await contract.methods
-			.createEvent(name, startDate, numberTickets, ticketPrice)
-			.send({ from: accounts[0] })
-			.catch((err) => {
-				setShowWeb3Error(true);
-				console.log(err);
-			});
+
+		const error = await createEvent(name, startDate, numberTickets, ticketPrice);
+
+		if (error != null) {
+			setShowWeb3Error(true);
+		}
 
 		// this is necessary to make sure useEffect fires. if the state is the same it will not update and thus, not call useEffect
 		setShowWeb3Error(true);
@@ -129,9 +126,9 @@ const NumbericError = () => {
 	return <Message error header="Invalid Input" content="The input must be numeric." />;
 };
 
-const EmptyError = () => {
-	return <Message error header="Input Required" content="The input cannot be empty." />;
-};
+// const EmptyError = () => {
+// 	return <Message error header="Input Required" content="The input cannot be empty." />;
+// };
 
 const Web3Error = () => {
 	return <Message error header="Web3 Error" content="There was an error with metamask" />;

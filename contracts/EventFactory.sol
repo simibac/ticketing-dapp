@@ -4,7 +4,7 @@ contract EventFactory{
     
     mapping (uint => Event) public events;
     uint public eventIndex;
-    
+
     struct Ticket{
         address payable owner;
         uint ticketId;
@@ -26,6 +26,11 @@ contract EventFactory{
         mapping (uint => Ticket) sellingQueue;
         mapping (uint => Ticket) tickets;
         mapping (uint => address payable) buyingQueue;
+        // location
+        // websiteUrl
+        // imageUrl
+        // Organizer
+        // Description
     }
     
     function createEvent(string memory _name, uint _date, uint _numTickets, uint _ticketPrice) public{
@@ -41,14 +46,13 @@ contract EventFactory{
             sellingQueueTail:0,
             buyingQueueHead: 0,
             buyingQueueTail: 0
-
         });
         eventIndex++;
     }
     
     function buyTicket(uint _eventId) public payable{
         Event storage e = events[_eventId];
-        require(msg.value == e.ticketPrice);
+        require(msg.value == e.ticketPrice, "The value does not match the ticket price.");
         
         // if not all tickets have been issued, the buyer automatically buys from the event owner
         if(e.ticketIndex < e.numTickets){
@@ -144,4 +148,17 @@ contract EventFactory{
     function getSellingQueueTail(uint _eventId) public view returns(uint){
         return events[_eventId].sellingQueueTail;
     }
+
+    // // as we cannot return an array of structs in solidity we return two arrays
+    // function getTickets(uint _eventId) public view returns(uint[] memory _ticketIds, address[] memory _addresses){
+    //     _ticketIds = new uint[](events[_eventId].ticketIndex);
+    //     _addresses = new address[](events[_eventId].ticketIndex);
+
+    //     for(uint256 i = 0; i < events[_eventId].ticketIndex; i++){
+    //         _ticketIds[i] = events[_eventId].tickets[i].ticketId;
+    //         _addresses[i] = events[_eventId].tickets[i].owner;
+
+    //     }
+    //     return (_ticketIds, _addresses);
+    // }
 }

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-import PageSwitcher from './components/PageSwitcher';
+import HeaderBar from './components/HeaderBar';
 import Web3Provider from './utils/Web3Provider';
 
 class App extends Component {
 	render() {
 		return (
 			<Web3Provider>
-				<PageSwitcher />
+				<HeaderBar />
 			</Web3Provider>
 		);
 	}
